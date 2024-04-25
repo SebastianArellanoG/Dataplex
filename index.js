@@ -1,5 +1,5 @@
-const { DataplexServiceClient } = require("@google-cloud/dataplex");
-const keys = require("/Users/sebastianarellano/Downloads/boot-jav-62f4a48f13a5.json");
+const { DataplexServiceClient } = require('@google-cloud/dataplex');
+const keys = require('../boot-jav-62f4a48f13a5.json');
 
 async function main() {
   // Crea una instancia del cliente de Dataplex usando las credenciales del archivo JSON
@@ -10,10 +10,10 @@ async function main() {
     },
   });
 
-  const projectId = "boot-jav";
-  const location = "us-central1";
+  const projectId = 'boot-jav';
+  const location = 'us-central1';
   const parent = `projects/${projectId}/locations/${location}`;
-  const lakeId = "abc123";
+  const lakeId = 'abc123';
   const lake = {};
 
   async function callCreateLake() {
