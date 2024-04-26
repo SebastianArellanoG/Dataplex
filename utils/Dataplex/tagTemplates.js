@@ -1,32 +1,73 @@
-function main(parent, tagTemplateId, tagTemplate) {
-  // [START datacatalog_v1_generated_DataCatalog_CreateTagTemplate_async]
-  /**
-   * This snippet has been automatically generated and should be regarded as a code template only.
-   * It will require modifications to work.
-   * It may require correct/in-range values for request initialization.
-   * TODO(developer): Uncomment these variables before running the sample.
-   */
+const keys = require('../../../boot-jav-62f4a48f13a5.json');
+const projectId = 'boot-jav';
+const location = 'us-central1';
+const credentials = {
+  client_email: keys.client_email,
+  private_key: keys.private_key,
+};
 
-  // const parent = 'abc123'
-  /**
-   *  Required. The ID of the tag template to create.
-   *  The ID must contain only lowercase letters (a-z), numbers (0-9),
-   *  or underscores (_), and must start with a letter or underscore.
-   *  The maximum size is 64 bytes when encoded in UTF-8.
-   */
-  // const tagTemplateId = 'abc123'
-  /**
-   *  Required. The tag template to create.
-   */
-  // const tagTemplate = {}
+const fields = {
+  fieldSource: {
+    displayName: 'Source of data asset',
+    type: {
+      primitiveType: 'STRING',
+    },
+  },
+  fieldNumRows: {
+    displayName: 'Number of rows in data asset',
+    isRequired: true,
+    type: {
+      primitiveType: 'DOUBLE',
+    },
+  },
+  fieldHasPII: {
+    displayName: 'Has PII',
+    type: {
+      primitiveType: 'BOOL',
+    },
+  },
+  fieldPIIType: {
+    displayName: 'PII type',
+    type: {
+      enumType: {
+        allowedValues: [
+          {
+            displayName: 'EMAIL',
+          },
+          {
+            displayName: 'SOCIAL SECURITY NUMBER',
+          },
+          {
+            displayName: 'NONE',
+          },
+        ],
+      },
+    },
+  },
+};
 
-  // Imports the Datacatalog library
-  const { DataCatalogClient } = require("@google-cloud/datacatalog").v1;
+const parent = `projects/${projectId}/locations/${location}`;
 
-  // Instantiates a client
-  const datacatalogClient = new DataCatalogClient();
+const tagTemplate = {
+  displayName: 'Demo d templates', // Nombre que se mostrará de la plantilla de etiqueta
+  isPubliclyReadable: true,
+  fields: fields,
+  // Puedes agregar más campos según sea necesario
 
-  async function callCreateTagTemplate() {
+  // Puedes agregar más configuraciones de la plantilla de etiqueta si es necesario
+};
+
+const tagTemplateId = 'abc123sssss';
+
+// Imports the Datacatalog library
+const { DataCatalogClient } =
+  require('@google-cloud/datacatalog').v1beta1;
+
+// Instantiates a client
+const datacatalogClient = new DataCatalogClient({ credentials });
+
+async function callCreateTagTemplate() {
+  try {
     // Construct request
     const request = {
       parent,
@@ -35,16 +76,13 @@ function main(parent, tagTemplateId, tagTemplate) {
     };
 
     // Run request
-    const response = await datacatalogClient.createTagTemplate(request);
+    const response = await datacatalogClient.createTagTemplate(
+      request
+    );
     console.log(response);
+  } catch (error) {
+    console.error('Error al crear la plantilla de etiqueta:', error);
   }
-
-  callCreateTagTemplate();
-  // [END datacatalog_v1_generated_DataCatalog_CreateTagTemplate_async]
 }
 
-process.on("unhandledRejection", (err) => {
-  console.error(err.message);
-  process.exitCode = 1;
-});
-main(...process.argv.slice(2));
+callCreateTagTemplate();

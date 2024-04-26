@@ -23,22 +23,6 @@ var data = XLSX.utils.sheet_to_json(worksheet);
 const lakes = new Set(data.map((row) => row['Lake']));
 const arrLakes = Array.from(lakes).map((lake) => lake.toLowerCase());
 
-const zones = new Set(data.map((row) => row['Zone']));
-const arrZones = Array.from(zones).map((zone) => zone.toLowerCase());
-
-const lakeZones = [];
-data.forEach((item) => {
-  const lake = item.Lake.toLowerCase();
-  const zone = item.Zone.toLowerCase();
-  if (!lakeZones[lake]) {
-    lakeZones[lake] = [];
-  }
-  if (!lakeZones[lake].includes(zone)) {
-    lakeZones[lake].push(zone);
-  }
-});
-
-console.log(lakeZones);
 async function createAllLakes() {
   try {
     await Promise.allSettled(
@@ -50,7 +34,7 @@ async function createAllLakes() {
   }
 }
 
-// createAllLakes();
+createAllLakes();
 async function createLake(lakeId) {
   const client = new DataplexServiceClient({ credentials });
   const parent = `projects/${projectId}/locations/${location}`;
