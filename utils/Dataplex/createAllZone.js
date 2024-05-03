@@ -22,8 +22,8 @@ var data = XLSX.utils.sheet_to_json(worksheet);
 const lakeZoneMap = {};
 
 data.forEach((entry) => {
-  const lake = entry.Lake.toLowerCase();
-  const zone = entry.Zone.toLowerCase();
+  const lake = entry.Lake.toLowerCase().replace(' ', '');
+  const zone = entry.Zone.toLowerCase().replace(' ', '');
 
   if (!lakeZoneMap[lake]) {
     lakeZoneMap[lake] = [];
@@ -33,7 +33,6 @@ data.forEach((entry) => {
   }
 });
 
-// Convertimos el objeto de relaciones en el formato requerido
 const dataLakeAndZone = Object.keys(lakeZoneMap).map((lake) => ({
   lake_id: lake,
   lakezone: lakeZoneMap[lake],

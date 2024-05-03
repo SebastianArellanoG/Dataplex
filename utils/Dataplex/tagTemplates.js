@@ -1,3 +1,5 @@
+const { DataCatalogClient } =
+  require('@google-cloud/datacatalog').v1beta1;
 const keys = require('../../../boot-jav-62f4a48f13a5.json');
 const projectId = 'boot-jav';
 const location = 'us-central1';
@@ -5,68 +7,61 @@ const credentials = {
   client_email: keys.client_email,
   private_key: keys.private_key,
 };
+var XLSX = require('xlsx');
+//Leer el archivo
+var workbook = XLSX.readFile('./tagTemplates.xlsx');
 
-const fields = {
-  fieldSource: {
-    displayName: 'Source of data asset',
-    type: {
-      primitiveType: 'STRING',
-    },
-  },
-  fieldNumRows: {
-    displayName: 'Number of rows in data asset',
-    isRequired: true,
-    type: {
-      primitiveType: 'DOUBLE',
-    },
-  },
-  fieldHasPII: {
-    displayName: 'Has PII',
-    type: {
-      primitiveType: 'BOOL',
-    },
-  },
-  fieldPIIType: {
-    displayName: 'PII type',
-    type: {
-      enumType: {
-        allowedValues: [
-          {
-            displayName: 'EMAIL',
+// Obtener la primera hoja del archivos
+var sheet_name_list = workbook.SheetNames;
+var worksheet = workbook.Sheets[sheet_name_list[0]];
+
+// Convertir la hoja a JSON
+var data = XLSX.utils.sheet_to_json(worksheet);
+
+const result = data.reduce((acc, item) => {
+  const existing = acc.find(
+    (template) => template.tagTemplateID === item.tagTemplateID
+  );
+
+  const field = {
+    displayName: item.displayName,
+    isRequired: item.Required,
+    type:
+      item.type === 'ENUM'
+        ? {
+            enumType: {
+              allowedValues: item.allowedValues
+                .split(',')
+                .map((value) => ({ displayName: value })),
+            },
+          }
+        : {
+            primitiveType: item.type,
           },
-          {
-            displayName: 'SOCIAL SECURITY NUMBER',
-          },
-          {
-            displayName: 'NONE',
-          },
-        ],
+  };
+
+  if (existing) {
+    existing.fields[item.Fields] = field;
+  } else {
+    acc.push({
+      tagTemplateID: item.tagTemplateID,
+      tagTemplate: {
+        displayName: item.tagTemplateName,
+        isPubliclyReadable: true,
+        fields: {
+          [item.Fields]: field,
+        },
       },
-    },
-  },
-};
+    });
+  }
+
+  return acc;
+}, []);
 
 const parent = `projects/${projectId}/locations/${location}`;
 
-const tagTemplate = {
-  displayName: 'Demo d templates', // Nombre que se mostrará de la plantilla de etiqueta
-  isPubliclyReadable: true,
-  fields: fields,
-  // Puedes agregar más campos según sea necesario
-
-  // Puedes agregar más configuraciones de la plantilla de etiqueta si es necesario
-};
-
-const tagTemplateId = 'abc123sssss';
-
-// Imports the Datacatalog library
-const { DataCatalogClient } =
-  require('@google-cloud/datacatalog').v1beta1;
-
-// Instantiates a client
-const datacatalogClient = new DataCatalogClient({ credentials });
-
-async function callCreateTagTemplate() {
+async function callCreateTagTemplate(tagTemplateId, tagTemplate) {
+  const datacatalogClient = new DataCatalogClient({ credentials });
   try {
     // Construct request
     const request = {
@@ -85,4 +80,17 @@ async function callCreateTagTemplate() {
   }
 }
 
-callCreateTagTemplate();
+async function createAllTagTemplates() {
+  try {
+    result.forEach(async (tag) => {
+      const { tagTemplateID, tagTemplate } = tag;
+      console.log(tagTemplate, tagTemplateID);
+      await callCreateTagTemplate(tagTemplateID, tagTemplate);
+      // lakezone.forEach(async (e) => await callCreateZone(e, parent));
+    });
+  } catch {
+    console.error('Error creating tagTemplate', error);
+  }
+}
+
+createAllTagTemplates();
